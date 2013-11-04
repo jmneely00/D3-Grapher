@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Test</title>
+        <script type="text/javascript" src="d3/d3.v3.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            var jsonData;
+            //Width and height
+            var w = 800;
+            var h = 400;
+            
+            d3.json("data.json", function(error, json) {
+                if (error) {
+                    console.warn(error);
+                }
+                jsonData = json;
+                console.log("Loaded data.json");
+                
+                plot(jsonData);
+            });
+            
+            var plot = function(jsonData) {
+                console.log("called plot function")
+                
+                // Set up the x and y scales for the data
+                var scaleX = d3.scale.linear()
+                               .domain([-20, 20])
+                               .range([0, w]);
+                
+                var scaleY = d3.scale.linear()
+                               .domain([-20, 20])
+                               .range([h, 0]);                
+                
+                // Create the svg element in the body
+                var svg = d3.select("body")
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", h);
+                
+                var circles = svg.selectAll("circle")
+                                 .data(jsonData.line1)
+                                 .enter()
+                                 .append("circle");
+                                
+                circles.attr("cx", function(d) {
+                    return scaleX(d[0]);
+                })
+                .attr("cy", function(d) {
+                    return scaleY(d[1]);
+                })
+                .attr("r", function(d) {
+                    return 5;
+                });
+                
+                svg.append("g")
+                   .call(d3.svg.axis()
+                   .scale(scaleX)
+                   .attr("class", "axis")  //Assign "axis" class
+                   .orient("bottom"));
+                
+            }
+        </script>
+    </body>
+</html>
