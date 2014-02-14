@@ -4,13 +4,43 @@
         <meta charset="utf-8">
         <title>D3 Test</title>
         <script type="text/javascript" src="d3/d3.v3.js"></script>
+
+        <style>
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: black;
+                shape-rendering: crispEdges;
+            }
+
+            .axis text {
+                font-family: sans-serif;
+                font-size: 11px;
+            }
+        </style>
     </head>
     <body>
         <script type="text/javascript">
+            // Set up some globals for simple access
             var jsonData;
             //Width and height
-            var w = 800;
-            var h = 400;
+            var w = 900;
+            var h = 600;
+            var padding = 10;
+
+            // Create the svg element in the body
+            var svg = d3.select("body")
+                        .append("svg")
+                        .attr("width", w)
+                        .attr("height", h);
+                            
+            // Set up the x and y scales for the data
+            var scaleX = d3.scale.linear()
+                           .domain([-25, 25])
+                           .range([0+padding, w-padding]);
+            var scaleY = d3.scale.linear()
+                           .domain([-25, 25])
+                           .range([h-padding, 0+padding]);
             
             d3.json("data.json", function(error, json) {
                 if (error) {
@@ -19,49 +49,108 @@
                 jsonData = json;
                 console.log("Loaded data.json");
                 
-                plot(jsonData);
+                drawAxis();
+                plotPoints(jsonData.line1);
+                drawLines(jsonData.line1);
+                plotPoints(jsonData.line2);
+                drawLines(jsonData.line2);
+                plotPoints(jsonData.line3);
+                drawLines(jsonData.line3);
+                plotPoints(jsonData.line4);
+                drawLines(jsonData.line4);
+                plotPoints(jsonData.line5);
+                drawLines(jsonData.line5);
+                
             });
             
-            var plot = function(jsonData) {
+            var drawAxis = function() {
+                var xAxis = d3.svg.axis()
+                    .scale(scaleX)
+                    .orient("bottom");
+
+                svg.append("g")
+                    .attr("class", "axis")
+                    .attr("transform", "translate(0," + (h/2) + ")")
+                    .call(xAxis);
+
+                var yAxis = d3.svg.axis()
+                    .scale(scaleY)
+                    .orient("left");
+
+                svg.append("g")
+                    .attr("class", "axis")
+                    .attr("transform", "translate(" + (w/2) + ",0)")
+                    .call(yAxis);
+            }
+            
+            var plotPoints = function(jsonData) {
                 console.log("called plot function");
                 
-                // Set up the x and y scales for the data
-                var scaleX = d3.scale.linear()
-                               .domain([-20, 20])
-                               .range([0, w]);
+                var circles = svg.selectAll("circle")
+                                 .data(jsonData)
+                                 .enter()
+                                 .append("circle");
                 
-                var scaleY = d3.scale.linear()
-                               .domain([-20, 20])
-                               .range([h, 0]);                
-                
-                // Create the svg element in the body
-                var svg = d3.select("body")
-                            .append("svg")
-                            .attr("width", w)
-                            .attr("height", h);
-                
+                /*
                 var circles = svg.selectAll("circle")
                                  .data(jsonData.line1)
                                  .enter()
                                  .append("circle");
+                                 */
                                 
-                circles.attr("cx", function(d) {
-                    return scaleX(d[0]);
-                })
-                .attr("cy", function(d) {
-                    return scaleY(d[1]);
-                })
-                .attr("r", function(d) {
-                    return 5;
-                });
-                
-                svg.append("g")
-                   .call(d3.svg.axis()
-                   .scale(scaleX)
-                   .attr("class", "axis")  //Assign "axis" class
-                   .orient("bottom"));
-                
+                circles.attr("cx", function(d) { return scaleX(d[0]); })
+                .attr("cy", function(d) { return scaleY(d[1]); })
+                .attr("r", function(d) { return 5; })
+                .attr("fill", "steelblue");
+
+                /*
+                svg.selectAll("text")
+                    .data(jsonData.line1)
+                    .enter()
+                    .append("text")
+                    .text(function(d) {
+                        return d[0] + "," + d[1];
+                    })
+                    .attr("x", function(d) {
+                        return d[0];
+                    })
+                    .attr("y", function(d) {
+                        return d[1];
+                    })
+                    .attr("font-family", "sans-serif")
+                    .attr("font-size", "11px")
+                    .attr("fill", "red");
+                    */
             };
+            
+            var drawLines = function(jsonData) {
+                console.log("Called drawLines function");
+                
+                // TODO: How to transition from line to line, so it slowly draws them?
+                var lineFunction = d3.svg.line()
+                    .x(function(d) { return scaleX(d[0]); })
+                    .y(function(d) { return scaleY(d[1]); })
+                    .interpolate("linear");
+                                    
+                //The line SVG Path we draw
+                var lineGraph = svg.append("path")
+                    .attr("d", lineFunction(jsonData))
+                    .transition()
+                    .duration(5000)
+                    .attrTween('d', pathTween)
+                    .attr("stroke", "blue")
+                    .attr("stroke-width", 2)
+                    .attr("fill", "none");
+                    
+                 function pathTween() {
+                    var interpolate = d3.scale.quantile()
+                    .domain([0,1])
+                    .range(d3.range(1, jsonData.length + 1));
+                    return function(t) {
+                        return lineFunction(jsonData.slice(0, interpolate(t)));
+                    };
+                }
+            }
         </script>
     </body>
 </html>
