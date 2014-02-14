@@ -21,6 +21,21 @@
     </head>
     <body>
         <script type="text/javascript">
+            /*
+                TODO:
+                    1) Figure out why I can't draw all the individual points
+                    2) Draw the x,y coordinates for the points
+                    3) Calculate the min/max values from the data, not hard-coded
+                    4) Draw the points with a transition, including drawing of the individual line segments
+                       This will make the drawing much more like you would do it by hand.
+                       - Or maybe draw the points gradually, one at a time, and then do the same for the line
+                         segments.
+                    5) Add a rudamentary interface so you can manually enter points to the web page
+                    6) Figure out how to calculate a total time do draw the entire page from start to 
+                       finish. Make it enterable via the web page. Then students can set it to 30 seconds,
+                       and watch it draw.
+            */
+
             // Set up some globals for simple access
             var jsonData;
             //Width and height
@@ -52,13 +67,13 @@
                 drawAxis();
                 plotPoints(jsonData.line1);
                 drawLines(jsonData.line1);
-                plotPoints(jsonData.line2);
+                // plotPoints(jsonData.line2);
                 drawLines(jsonData.line2);
-                plotPoints(jsonData.line3);
+                // plotPoints(jsonData.line3);
                 drawLines(jsonData.line3);
-                plotPoints(jsonData.line4);
+                // plotPoints(jsonData.line4);
                 drawLines(jsonData.line4);
-                plotPoints(jsonData.line5);
+                // plotPoints(jsonData.line5);
                 drawLines(jsonData.line5);
                 
             });
